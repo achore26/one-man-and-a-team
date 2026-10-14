@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="OMT Quotes">
+  <meta name="description" content="Fast offline quote and invoice generator for One Man and a Team">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>One Man and a Team - Quote Generator</title>
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand-wrapper">
+        <img src="./favicon.svg" alt="Logo" class="brand-logo">
+        <div>
+          <h1 class="brand-title" id="headerBusinessName">One Man and a Team</h1>
+          <p class="brand-subtitle" id="headerTagline">CCTV • Building • Mechanical</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="icon-btn" id="btnOpenHistory" title="Saved Quotes">📋</button>
+        <button type="button" class="icon-btn" id="btnOpenProfile" title="Business Settings">⚙️</button>
+        <button type="button" class="icon-btn" id="btnNewQuote" title="New Blank Quote">🔄</button>
+      </div>
+    </div>
+    <div>
+      <span class="status-pill online" id="statusBadge">
+        <span class="dot"></span>
+        <span id="statusText">⚡ 100% Offline Ready</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="container">
+
+    <!-- Document Type Switcher -->
+    <div class="type-toggle-card">
+      <button type="button" class="toggle-btn active" id="btnTypeQuote" data-type="QUOTE">Quote / Estimate</button>
+      <button type="button" class="toggle-btn" id="btnTypeInvoice" data-type="INVOICE">Tax Invoice</button>
+    </div>
+
+    <!-- Client Details Card -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span>👤 Client / Customer</span>
+          <span class="badge">Required</span>
+        </h2>
+      </div>
+      <div class="form-group">
+        <label for="customerName">Client Name / Business *</label>
+        <input type="text" id="customerName" placeholder="e.g. Dave Miller / Apex Logistics" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="customerPhone">Phone / WhatsApp</label>
+          <input type="tel" id="customerPhone" placeholder="+1 (555) 000-0000">
+        </div>
+        <div class="form-group">
+          <label for="customerAddress">Site / Address</label>
+          <input type="text" id="customerAddress" placeholder="e.g. 104 Industrial Way">
+        </div>
+      </div>
+    </section>
+
+    <!-- Document Meta (Number & Dates) -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span id="docMetaTitle">📄 Quote Details</span>
+        </h2>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="quoteNumber" id="lblDocNumber">Quote #</label>
+          <input type="text" id="quoteNumber" value="OMT-1001">
+        </div>
+        <div class="form-group">
+          <label for="quoteDate">Date</label>
+          <input type="date" id="quoteDate">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="quoteDueDate" id="lblDocDue">Valid Until (Expiry)</label>
+        <input type="date" id="quoteDueDate">
+      </div>
+    </section>
+
+    <!-- Line Items & Quick Presets -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span>🛠️ Items & Services</span>
+        </h2>
+      </div>
+
+      <!-- Quick Trade Presets -->
+      <div class="chips-label">Quick presets (tap to add):</div>
+      <div class="chips-scroll">
+        <button type="button" class="chip-btn" data-desc="4x 5MP IP CCTV System + 8CH NVR + Installation" data-price="750">📹 CCTV 4-Cam Kit</button>
+        <button type="button" class="chip-btn" data-desc="Cat6 Cabling, Conduit & Network Configuration" data-price="220">🌐 Cabling & Setup</button>
+        <button type="button" class="chip-btn" data-desc="Contractor Full Day Labor (Lead & Crew)" data-price="450">👷 Full Day Labor</button>
+        <button type="button" class="chip-btn" data-desc="Mechanical Diagnostics & Component Servicing" data-price="180">🔧 Mechanical Service</button>
+        <button type="button" class="chip-btn" data-desc="Construction Materials & Site Preparation" data-price="350">🏗️ Building & Prep</button>
+      </div>
+
+      <!-- Dynamic Items List -->
+      <div class="items-list" id="itemsList">
+        <!-- Item cards injected here by JavaScript -->
+      </div>
+
+      <button type="button" class="btn-add-item" id="btnAddItem">
+        <span>➕</span> Add Another Item
+      </button>
+    </section>
+
+    <!-- Totals & Payment Breakdown -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span>💵 Pricing & Terms (USD)</span>
+        </h2>
+      </div>
+
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span id="summarySubtotal">$0.00</span>
+      </div>
+
+      <div class="form-row" style="margin-top: 8px;">
+        <div class="form-group">
+          <label for="inputDiscount">Discount ($)</label>
+          <div class="input-with-symbol">
+            <span class="input-symbol">$</span>
+            <input type="number" id="inputDiscount" min="0" step="1" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="inputTax">Tax (%)</label>
+          <input type="number" id="inputTax" min="0" max="100" step="0.5" placeholder="0">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 4px;">
+        <label for="inputDeposit">Deposit Required (%)</label>
+        <select id="inputDeposit">
+          <option value="0">No Deposit (100% on completion)</option>
+          <option value="30">30% Deposit</option>
+          <option value="50" selected>50% Deposit (Materials Upfront)</option>
+          <option value="70">70% Deposit</option>
+        </select>
+      </div>
+
+      <div class="summary-row bold">
+        <span>Grand Total (USD)</span>
+        <span id="summaryGrandTotal" style="color: var(--primary);">$0.00</span>
+      </div>
+
+      <div class="summary-row deposit" id="depositRow">
+        <span id="depositLabel">50% Deposit Due:</span>
+        <span id="summaryDeposit">$0.00</span>
+      </div>
+
+      <div class="form-group" style="margin-top: 14px;">
+        <label for="quoteNotes">Job Notes & Terms</label>
+        <textarea id="quoteNotes" rows="3" placeholder="Warranties, timeline, or special instructions..."></textarea>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Sticky Bottom Mobile Action Bar -->
+  <aside class="bottom-bar">
+    <button type="button" class="btn-secondary" id="btnPreview" title="Preview Document">
+      👁️ Preview
+    </button>
+    <button type="button" class="btn-primary" id="btnDownload" title="Download PDF to Phone">
+      ⬇️ PDF
+    </button>
+    <button type="button" class="btn-share" id="btnShare" title="Share directly to WhatsApp or Mail">
+      📲 WhatsApp / Share
+    </button>
+  </aside>
+
+  <!-- Business Profile Modal -->
+  <div class="modal-backdrop hidden" id="modalProfile">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title">⚙️ Business Profile</h3>
+        <button type="button" class="modal-close-btn" id="btnCloseProfile">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="profBusinessName">Business Name</label>
+          <input type="text" id="profBusinessName">
+        </div>
+        <div class="form-group">
+          <label for="profTagline">Tagline / Trades</label>
+          <input type="text" id="profTagline">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="profPhone">Phone / WhatsApp</label>
+            <input type="tel" id="profPhone">
+          </div>
+          <div class="form-group">
+            <label for="profEmail">Email</label>
+            <input type="text" id="profEmail">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="profAddress">Service Coverage / Location</label>
+          <input type="text" id="profAddress">
+        </div>
+        <div class="form-group">
+          <label for="profPaymentInfo">Bank / Zelle / Cash Instructions</label>
+          <textarea id="profPaymentInfo" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="profDefaultTerms">Default Terms & Warranties</label>
+          <textarea id="profDefaultTerms" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" id="btnSaveProfile" style="width: 100%;">💾 Save Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Past Quotes / History Modal -->
+  <div class="modal-backdrop hidden" id="modalHistory">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title">📋 Saved Quotes & Invoices</h3>
+        <button type="button" class="modal-close-btn" id="btnCloseHistory">&times;</button>
+      </div>
+      <div class="modal-body" id="historyListContainer">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCloseHistoryFooter" style="width: 100%;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live PDF Preview Modal -->
+  <div class="modal-backdrop hidden" id="modalPreview">
+    <div class="modal-sheet" style="height: 90vh;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="previewTitle">📄 Document Preview</h3>
+        <button type="button" class="modal-close-btn" id="btnClosePreview">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 0; background: #525659;">
+        <iframe id="previewIframe" style="width: 100%; height: 100%; border: none;"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnDownloadFromPreview">⬇️ Download PDF</button>
+        <button type="button" class="btn-share" id="btnShareFromPreview">📲 Share / WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toastMessage">Quote saved!</div>
+
+  <!-- App Entry Point -->
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
