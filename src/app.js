@@ -12,11 +12,13 @@ import {
 
 import {
   formatUSD,
-  generatePDFDoc,
+  prefetchLogo,
   getPDFBlob,
   downloadPDF,
   sharePDF
 } from './pdf.js';
+
+import { renderIcons } from './icons.js';
 
 // Application State
 let state = {
@@ -29,7 +31,7 @@ let state = {
   date: new Date().toISOString().split('T')[0],
   dueDate: '',
   items: [
-    { id: 1, description: 'CCTV Camera System & Cabling Installation', qty: 1, price: 650 }
+    { id: 1, description: '4-Channel 5MP IP Surveillance System, NVR & Installation', qty: 1, price: 750 }
   ],
   discount: 0,
   taxPercent: 0,
@@ -39,7 +41,7 @@ let state = {
 
 let profile = getProfile();
 
-// DOM Elements
+// DOM Element Registry
 const elements = {
   headerBusinessName: document.getElementById('headerBusinessName'),
   headerTagline: document.getElementById('headerTagline'),
@@ -57,6 +59,7 @@ const elements = {
   quoteDate: document.getElementById('quoteDate'),
   quoteDueDate: document.getElementById('quoteDueDate'),
   itemsList: document.getElementById('itemsList'),
+  itemCountBadge: document.getElementById('itemCountBadge'),
   btnAddItem: document.getElementById('btnAddItem'),
   summarySubtotal: document.getElementById('summarySubtotal'),
   inputDiscount: document.getElementById('inputDiscount'),
@@ -99,24 +102,29 @@ const elements = {
   btnShareFromPreview: document.getElementById('btnShareFromPreview')
 };
 
-// Show Toast
+// Toast Notification
 function showToast(msg) {
-  elements.toastMessage.textContent = msg;
+  const toastText = elements.toastMessage.querySelector('.toast-text');
+  if (toastText) toastText.textContent = msg;
   elements.toastMessage.classList.add('show');
   setTimeout(() => {
     elements.toastMessage.classList.remove('show');
-  }, 2500);
+  }, 2400);
 }
 
-// Update Network / Offline Badge
+// Online / Offline Status Chip
 function updateOnlineStatus() {
+  const icon = elements.statusBadge.querySelector('.status-icon');
   if (navigator.onLine) {
-    elements.statusBadge.className = 'status-pill online';
-    elements.statusText.textContent = '⚡ 100% Offline Ready';
+    elements.statusBadge.className = 'status-chip online';
+    elements.statusText.textContent = '100% Offline Ready';
+    if (icon) icon.setAttribute('data-lucide', 'shield-check');
   } else {
-    elements.statusBadge.className = 'status-pill offline';
-    elements.statusText.textContent = '📴 Offline Mode Active';
+    elements.statusBadge.className = 'status-chip offline';
+    elements.statusText.textContent = 'Offline Mode Active';
+    if (icon) icon.setAttribute('data-lucide', 'wifi-off');
   }
+  renderIcons(elements.statusBadge);
 }
 
 // Calculate Default Due Date (+14 days)
@@ -130,46 +138,60 @@ function calculateDefaultDueDate(baseDateStr) {
   }
 }
 
+// Escape HTML utility
+function escapeHtml(str) {
+  return (str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 // Render Line Items
 function renderItems() {
   elements.itemsList.innerHTML = '';
-  
-  if (state.items.length === 0) {
+
+  const count = state.items.length;
+  elements.itemCountBadge.textContent = `${count} ${count === 1 ? 'item' : 'items'}`;
+
+  if (count === 0) {
     elements.itemsList.innerHTML = `
-      <div style="text-align: center; color: var(--slate-400); padding: 16px;">
-        No items added yet. Tap <strong>+ Add Another Item</strong> or use a preset above!
+      <div style="text-align: center; color: var(--md-sys-on-surface-subtle); padding: 24px; font-size: 0.88rem;">
+        No line items added. Tap <strong>Add Line Item</strong> or select a preset above.
       </div>
     `;
     updateTotals();
     return;
   }
 
-  state.items.forEach((item, index) => {
+  state.items.forEach((item) => {
     const card = document.createElement('div');
-    card.className = 'item-card';
+    card.className = 'm3-item-card';
 
     const lineTotal = (Number(item.qty) || 1) * (Number(item.price) || 0);
 
     card.innerHTML = `
-      <div class="item-card-top">
-        <input type="text" class="item-card-desc" value="${escapeHtml(item.description || '')}" placeholder="Item / Service description..." data-id="${item.id}" data-field="description">
-        <button type="button" class="item-delete-btn" title="Remove Item" data-id="${item.id}">&times;</button>
+      <div class="item-row-top">
+        <input type="text" class="item-input-desc" value="${escapeHtml(item.description || '')}" placeholder="Description of material, hardware or labor..." data-id="${item.id}" data-field="description">
+        <button type="button" class="item-btn-remove" title="Remove Item" data-id="${item.id}" aria-label="Remove Item">
+          <i data-lucide="trash-2"></i>
+        </button>
       </div>
-      <div class="item-card-bottom">
+      <div class="item-row-bottom">
         <div>
-          <label style="font-size: 0.72rem; margin-bottom: 2px;">Qty</label>
-          <input type="number" min="1" step="1" value="${item.qty}" data-id="${item.id}" data-field="qty">
+          <label style="font-size: 0.7rem; margin-bottom: 2px;">Qty</label>
+          <input type="number" min="1" step="1" value="${item.qty}" data-id="${item.id}" data-field="qty" class="font-mono">
         </div>
         <div>
-          <label style="font-size: 0.72rem; margin-bottom: 2px;">Price ($)</label>
-          <div class="input-with-symbol">
-            <span class="input-symbol">$</span>
-            <input type="number" min="0" step="0.5" value="${item.price}" data-id="${item.id}" data-field="price">
+          <label style="font-size: 0.7rem; margin-bottom: 2px;">Unit Price ($)</label>
+          <div class="m3-input-affix">
+            <span class="affix-text">$</span>
+            <input type="number" min="0" step="0.5" value="${item.price}" data-id="${item.id}" data-field="price" class="font-mono">
           </div>
         </div>
         <div>
-          <label style="font-size: 0.72rem; margin-bottom: 2px; text-align: right; display: block;">Total</label>
-          <div class="item-line-total">${formatUSD(lineTotal)}</div>
+          <label style="font-size: 0.7rem; margin-bottom: 2px; text-align: right; display: block;">Line Total</label>
+          <div class="item-computed-total font-mono">${formatUSD(lineTotal)}</div>
         </div>
       </div>
     `;
@@ -177,7 +199,7 @@ function renderItems() {
     elements.itemsList.appendChild(card);
   });
 
-  // Attach Item Event Listeners
+  // Attach Item Input Event Listeners
   elements.itemsList.querySelectorAll('input').forEach(input => {
     input.addEventListener('input', (e) => {
       const id = Number(e.target.dataset.id);
@@ -187,9 +209,8 @@ function renderItems() {
       if (targetItem) {
         if (field === 'qty' || field === 'price') {
           targetItem[field] = Number(val) || 0;
-          // Update the line total display
-          const card = e.target.closest('.item-card');
-          const totalEl = card.querySelector('.item-line-total');
+          const card = e.target.closest('.m3-item-card');
+          const totalEl = card.querySelector('.item-computed-total');
           const newLineTotal = (Number(targetItem.qty) || 1) * (Number(targetItem.price) || 0);
           totalEl.textContent = formatUSD(newLineTotal);
         } else {
@@ -201,7 +222,8 @@ function renderItems() {
     });
   });
 
-  elements.itemsList.querySelectorAll('.item-delete-btn').forEach(btn => {
+  // Attach Item Delete Listeners
+  elements.itemsList.querySelectorAll('.item-btn-remove').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const id = Number(e.currentTarget.dataset.id);
       state.items = state.items.filter(i => i.id !== id);
@@ -210,6 +232,8 @@ function renderItems() {
     });
   });
 
+  // Convert Lucide icons in newly injected items
+  renderIcons(elements.itemsList);
   updateTotals();
 }
 
@@ -236,7 +260,7 @@ function updateTotals() {
 
   if (depositPercent > 0) {
     elements.depositRow.style.display = 'flex';
-    elements.depositLabel.textContent = `${depositPercent}% Deposit Required:`;
+    elements.depositLabel.textContent = `${depositPercent}% Advance Deposit Due:`;
     elements.summaryDeposit.textContent = formatUSD(depositAmount);
   } else {
     elements.depositRow.style.display = 'none';
@@ -263,7 +287,7 @@ function saveDraftState() {
 function resetToNewQuote() {
   const newNum = getNextQuoteNumber(state.type);
   const today = new Date().toISOString().split('T')[0];
-  
+
   state = {
     id: Date.now().toString(),
     type: state.type,
@@ -285,7 +309,7 @@ function resetToNewQuote() {
   syncStateToInputs();
   renderItems();
   saveDraftState();
-  showToast('Started new blank document');
+  showToast('New blank document initialized');
 }
 
 // Sync State into DOM inputs
@@ -304,28 +328,27 @@ function syncStateToInputs() {
   // Toggle buttons
   if (state.type === 'INVOICE') {
     elements.btnTypeInvoice.classList.add('active');
+    elements.btnTypeInvoice.setAttribute('aria-selected', 'true');
     elements.btnTypeQuote.classList.remove('active');
-    elements.docMetaTitle.textContent = '📄 Invoice Details';
-    elements.lblDocNumber.textContent = 'Invoice #';
+    elements.btnTypeQuote.setAttribute('aria-selected', 'false');
+    elements.docMetaTitle.textContent = 'Invoice Specifications';
+    elements.lblDocNumber.textContent = 'Invoice Reference #';
     elements.lblDocDue.textContent = 'Payment Due Date';
   } else {
     elements.btnTypeQuote.classList.add('active');
+    elements.btnTypeQuote.setAttribute('aria-selected', 'true');
     elements.btnTypeInvoice.classList.remove('active');
-    elements.docMetaTitle.textContent = '📄 Quote Details';
-    elements.lblDocNumber.textContent = 'Quote #';
-    elements.lblDocDue.textContent = 'Valid Until (Expiry)';
+    elements.btnTypeInvoice.setAttribute('aria-selected', 'false');
+    elements.docMetaTitle.textContent = 'Document Specifications';
+    elements.lblDocNumber.textContent = 'Reference Number';
+    elements.lblDocDue.textContent = 'Terms Expiry / Validity Date';
   }
 }
 
 // Update Profile in Header & UI
 function applyProfile() {
-  elements.headerBusinessName.textContent = profile.businessName || 'One Man and a Team';
-  elements.headerTagline.textContent = profile.tagline || 'CCTV • Building • Mechanical';
-}
-
-// Helpers
-function escapeHtml(str) {
-  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  elements.headerBusinessName.textContent = (profile.businessName || 'ONE MAN & A TEAM').toUpperCase();
+  elements.headerTagline.textContent = profile.tagline || 'Technical & Contracting Services';
 }
 
 // Setup Event Listeners
@@ -353,7 +376,7 @@ function initEventListeners() {
     saveDraftState();
   });
 
-  // Input changes
+  // Inputs live change
   const liveInputs = [
     elements.customerName,
     elements.customerPhone,
@@ -389,13 +412,12 @@ function initEventListeners() {
     });
     renderItems();
     saveDraftState();
-    // Focus last item description
-    const lastInput = elements.itemsList.querySelector('.item-card:last-child .item-card-desc');
+    const lastInput = elements.itemsList.querySelector('.m3-item-card:last-child .item-input-desc');
     if (lastInput) lastInput.focus();
   });
 
   // Preset Chips
-  document.querySelectorAll('.chip-btn').forEach(btn => {
+  document.querySelectorAll('.m3-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       const desc = btn.dataset.desc;
       const price = Number(btn.dataset.price) || 0;
@@ -407,24 +429,24 @@ function initEventListeners() {
       });
       renderItems();
       saveDraftState();
-      showToast(`Added: ${desc.split(' ')[0]}...`);
+      showToast('Item preset added');
     });
   });
 
   // New Quote Button
   elements.btnNewQuote.addEventListener('click', () => {
-    if (confirm('Start a new blank quote / invoice? Any saved quotes in History will remain safe.')) {
+    if (confirm('Create a new blank document? Any previously completed documents in History remain safe.')) {
       resetToNewQuote();
     }
   });
 
   // Action: Download PDF
-  elements.btnDownload.addEventListener('click', () => {
+  elements.btnDownload.addEventListener('click', async () => {
     saveDraftState();
     saveToHistory(state);
-    downloadPDF(state, profile);
+    await downloadPDF(state, profile);
     incrementQuoteNumber();
-    showToast('PDF downloaded & saved to History!');
+    showToast('PDF generated & downloaded');
   });
 
   // Action: Share / WhatsApp
@@ -435,16 +457,16 @@ function initEventListeners() {
     incrementQuoteNumber();
     if (result && result.method === 'download_and_whatsapp' && result.waUrl) {
       window.open(result.waUrl, '_blank');
-      showToast('Downloaded PDF & Opening WhatsApp');
+      showToast('Document downloaded & WhatsApp launched');
     } else if (result && result.success) {
-      showToast('Shared successfully!');
+      showToast('Document shared successfully');
     }
   });
 
   // Action: Preview PDF
-  elements.btnPreview.addEventListener('click', () => {
+  elements.btnPreview.addEventListener('click', async () => {
     saveDraftState();
-    const blob = getPDFBlob(state, profile);
+    const blob = await getPDFBlob(state, profile);
     const blobUrl = URL.createObjectURL(blob);
     elements.previewIframe.src = blobUrl;
     elements.modalPreview.classList.remove('hidden');
@@ -495,7 +517,7 @@ function initEventListeners() {
     saveProfile(profile);
     applyProfile();
     elements.modalProfile.classList.add('hidden');
-    showToast('Business Profile Updated!');
+    showToast('Business profile updated');
   });
 
   // History Modal
@@ -519,8 +541,8 @@ function renderHistoryList() {
 
   if (history.length === 0) {
     elements.historyListContainer.innerHTML = `
-      <div style="text-align: center; color: var(--slate-400); padding: 30px;">
-        No saved quotes yet.<br>Quotes are automatically saved here whenever you preview, download, or share!
+      <div style="text-align: center; color: var(--md-sys-on-surface-subtle); padding: 36px 16px; font-size: 0.88rem;">
+        No documents saved yet.<br>Documents are automatically cataloged here whenever you preview, download, or share.
       </div>
     `;
     return;
@@ -528,18 +550,24 @@ function renderHistoryList() {
 
   history.forEach(item => {
     const el = document.createElement('div');
-    el.className = 'history-item';
+    el.className = 'history-entry';
     el.innerHTML = `
-      <div class="history-item-left">
-        <span class="history-name">${escapeHtml(item.customerName || 'Untitled Client')}</span>
-        <span class="history-meta">${item.quoteNumber || 'OMT'} • ${item.date || ''} • ${item.type || 'QUOTE'}</span>
+      <div class="history-entry-meta">
+        <span class="history-customer">${escapeHtml(item.customerName || 'Untitled Client')}</span>
+        <span class="history-sub">
+          <span>${item.quoteNumber || 'OMT'}</span>
+          <span>•</span>
+          <span>${item.date || ''}</span>
+          <span>•</span>
+          <span>${item.type || 'QUOTE'}</span>
+        </span>
       </div>
-      <div class="history-item-right">
-        <span class="history-total">${formatUSD(item.total || 0)}</span>
-        <div style="display: flex; gap: 6px;">
-          <button type="button" class="history-btn-load" data-id="${item.id}">Load</button>
-          <button type="button" class="item-delete-btn" style="font-size: 16px;" data-del-id="${item.id}">&times;</button>
-        </div>
+      <div class="history-entry-actions">
+        <span class="history-total-amt font-mono">${formatUSD(item.total || 0)}</span>
+        <button type="button" class="history-btn-load" data-id="${item.id}">Load</button>
+        <button type="button" class="item-btn-remove" data-del-id="${item.id}" title="Delete Record">
+          <i data-lucide="trash-2"></i>
+        </button>
       </div>
     `;
 
@@ -553,7 +581,7 @@ function renderHistoryList() {
 
     el.querySelector('[data-del-id]').addEventListener('click', (e) => {
       e.stopPropagation();
-      if (confirm('Delete this saved quote from history?')) {
+      if (confirm('Delete this record from offline history?')) {
         deleteFromHistory(item.id);
         renderHistoryList();
       }
@@ -561,6 +589,8 @@ function renderHistoryList() {
 
     elements.historyListContainer.appendChild(el);
   });
+
+  renderIcons(elements.historyListContainer);
 }
 
 // PWA Service Worker Registration
@@ -568,16 +598,19 @@ function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker registered successfully:', reg.scope))
-        .catch(err => console.warn('Service Worker registration skipped/failed:', err));
+        .then(reg => console.log('OMT Service Worker active:', reg.scope))
+        .catch(err => console.warn('Service Worker registration skipped:', err));
     });
   }
 }
 
-// Initial Boot
-function init() {
+// Initialize Application
+async function init() {
   updateOnlineStatus();
   applyProfile();
+
+  // Prefetch logo asset for instant PDF generation
+  prefetchLogo();
 
   // Try to load last draft, otherwise initialize fresh
   const savedDraft = loadDraft();
@@ -591,6 +624,7 @@ function init() {
   syncStateToInputs();
   renderItems();
   initEventListeners();
+  renderIcons(); // Initial Lucide render for whole document
   registerServiceWorker();
 }
 

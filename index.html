@@ -3,276 +3,362 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#1e3a8a">
+  <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="OMT Quotes">
-  <meta name="description" content="Fast offline quote and invoice generator for One Man and a Team">
+  <meta name="apple-mobile-web-app-title" content="OMT Pro">
+  <meta name="description" content="Professional offline quote and invoice generator for One Man and a Team">
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>One Man and a Team - Quote Generator</title>
+  <title>One Man and a Team — Quote &amp; Invoice Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
 
-  <!-- Top App Header -->
+  <!-- Top M3 App Bar -->
   <header class="app-header">
-    <div class="header-top">
-      <div class="brand-wrapper">
-        <img src="./favicon.svg" alt="Logo" class="brand-logo">
-        <div>
-          <h1 class="brand-title" id="headerBusinessName">One Man and a Team</h1>
-          <p class="brand-subtitle" id="headerTagline">CCTV • Building • Mechanical</p>
+    <div class="header-inner">
+      <div class="brand-container">
+        <img src="./logo.svg" alt="OMT Logo" class="brand-logo" width="46" height="46">
+        <div class="brand-text">
+          <div class="brand-row">
+            <h1 class="brand-title" id="headerBusinessName">ONE MAN &amp; A TEAM</h1>
+            <span class="brand-badge">PRO</span>
+          </div>
+          <p class="brand-subtitle" id="headerTagline">Technical &amp; Contracting Services</p>
         </div>
       </div>
       <div class="header-actions">
-        <button type="button" class="icon-btn" id="btnOpenHistory" title="Saved Quotes">📋</button>
-        <button type="button" class="icon-btn" id="btnOpenProfile" title="Business Settings">⚙️</button>
-        <button type="button" class="icon-btn" id="btnNewQuote" title="New Blank Quote">🔄</button>
+        <button type="button" class="m3-icon-btn" id="btnOpenHistory" aria-label="Quote History" title="Quote History">
+          <i data-lucide="folder-clock"></i>
+        </button>
+        <button type="button" class="m3-icon-btn" id="btnOpenProfile" aria-label="Business Profile" title="Business Profile">
+          <i data-lucide="sliders-horizontal"></i>
+        </button>
+        <button type="button" class="m3-icon-btn" id="btnNewQuote" aria-label="New Document" title="New Blank Document">
+          <i data-lucide="rotate-ccw"></i>
+        </button>
       </div>
     </div>
-    <div>
-      <span class="status-pill online" id="statusBadge">
-        <span class="dot"></span>
-        <span id="statusText">⚡ 100% Offline Ready</span>
+    <div class="header-status-bar">
+      <span class="status-chip online" id="statusBadge">
+        <span class="status-dot"></span>
+        <i data-lucide="shield-check" class="status-icon"></i>
+        <span id="statusText">100% Offline Ready</span>
       </span>
     </div>
   </header>
 
-  <!-- Main Content Container -->
+  <!-- Main Work Surface -->
   <main class="container">
 
-    <!-- Document Type Switcher -->
-    <div class="type-toggle-card">
-      <button type="button" class="toggle-btn active" id="btnTypeQuote" data-type="QUOTE">Quote / Estimate</button>
-      <button type="button" class="toggle-btn" id="btnTypeInvoice" data-type="INVOICE">Tax Invoice</button>
+    <!-- Document Type Segmented Control -->
+    <div class="m3-segmented-control" role="tablist">
+      <button type="button" class="m3-segment-btn active" id="btnTypeQuote" data-type="QUOTE" role="tab" aria-selected="true">
+        <i data-lucide="file-text"></i>
+        <span>Quote / Estimate</span>
+      </button>
+      <button type="button" class="m3-segment-btn" id="btnTypeInvoice" data-type="INVOICE" role="tab" aria-selected="false">
+        <i data-lucide="receipt"></i>
+        <span>Tax Invoice</span>
+      </button>
     </div>
 
-    <!-- Client Details Card -->
-    <section class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <span>👤 Client / Customer</span>
-          <span class="badge">Required</span>
-        </h2>
-      </div>
-      <div class="form-group">
-        <label for="customerName">Client Name / Business *</label>
-        <input type="text" id="customerName" placeholder="e.g. Dave Miller / Apex Logistics" autocomplete="off">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="customerPhone">Phone / WhatsApp</label>
-          <input type="tel" id="customerPhone" placeholder="+1 (555) 000-0000">
+    <!-- Client Information Card -->
+    <section class="m3-card">
+      <div class="m3-card-header">
+        <div class="m3-card-title">
+          <i data-lucide="user"></i>
+          <span>Client Information</span>
         </div>
-        <div class="form-group">
-          <label for="customerAddress">Site / Address</label>
-          <input type="text" id="customerAddress" placeholder="e.g. 104 Industrial Way">
+        <span class="m3-badge-subtle">Primary Contact</span>
+      </div>
+      <div class="m3-field">
+        <label for="customerName">Client Name or Business Organization *</label>
+        <input type="text" id="customerName" placeholder="e.g. Sterling Residential Properties" autocomplete="off">
+      </div>
+      <div class="m3-grid-2">
+        <div class="m3-field">
+          <label for="customerPhone">Phone / WhatsApp</label>
+          <input type="tel" id="customerPhone" placeholder="+1 (555) 234-5678">
+        </div>
+        <div class="m3-field">
+          <label for="customerAddress">Project Location / Site Address</label>
+          <input type="text" id="customerAddress" placeholder="e.g. 842 Commerce Parkway">
         </div>
       </div>
     </section>
 
-    <!-- Document Meta (Number & Dates) -->
-    <section class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <span id="docMetaTitle">📄 Quote Details</span>
-        </h2>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="quoteNumber" id="lblDocNumber">Quote #</label>
-          <input type="text" id="quoteNumber" value="OMT-1001">
+    <!-- Document Specification Card -->
+    <section class="m3-card">
+      <div class="m3-card-header">
+        <div class="m3-card-title">
+          <i data-lucide="file-spreadsheet"></i>
+          <span id="docMetaTitle">Document Specifications</span>
         </div>
-        <div class="form-group">
-          <label for="quoteDate">Date</label>
+      </div>
+      <div class="m3-grid-2">
+        <div class="m3-field">
+          <label for="quoteNumber" id="lblDocNumber">Reference Number</label>
+          <input type="text" id="quoteNumber" value="OMT-1001" class="font-mono">
+        </div>
+        <div class="m3-field">
+          <label for="quoteDate">Issue Date</label>
           <input type="date" id="quoteDate">
         </div>
       </div>
-      <div class="form-group">
-        <label for="quoteDueDate" id="lblDocDue">Valid Until (Expiry)</label>
+      <div class="m3-field">
+        <label for="quoteDueDate" id="lblDocDue">Terms Expiry / Validity Date</label>
         <input type="date" id="quoteDueDate">
       </div>
     </section>
 
-    <!-- Line Items & Quick Presets -->
-    <section class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <span>🛠️ Items & Services</span>
-        </h2>
+    <!-- Items & Services Card -->
+    <section class="m3-card">
+      <div class="m3-card-header">
+        <div class="m3-card-title">
+          <i data-lucide="layers"></i>
+          <span>Billable Items &amp; Services</span>
+        </div>
+        <span class="m3-badge-counter" id="itemCountBadge">1 item</span>
       </div>
 
-      <!-- Quick Trade Presets -->
-      <div class="chips-label">Quick presets (tap to add):</div>
-      <div class="chips-scroll">
-        <button type="button" class="chip-btn" data-desc="4x 5MP IP CCTV System + 8CH NVR + Installation" data-price="750">📹 CCTV 4-Cam Kit</button>
-        <button type="button" class="chip-btn" data-desc="Cat6 Cabling, Conduit & Network Configuration" data-price="220">🌐 Cabling & Setup</button>
-        <button type="button" class="chip-btn" data-desc="Contractor Full Day Labor (Lead & Crew)" data-price="450">👷 Full Day Labor</button>
-        <button type="button" class="chip-btn" data-desc="Mechanical Diagnostics & Component Servicing" data-price="180">🔧 Mechanical Service</button>
-        <button type="button" class="chip-btn" data-desc="Construction Materials & Site Preparation" data-price="350">🏗️ Building & Prep</button>
+      <!-- Trade Preset Chips -->
+      <div class="m3-chips-header">Quick Presets:</div>
+      <div class="m3-chips-tray">
+        <button type="button" class="m3-chip" data-desc="4-Channel 5MP IP Surveillance System, NVR &amp; Installation" data-price="750">
+          <i data-lucide="video"></i>
+          <span>CCTV 4-Cam Kit</span>
+        </button>
+        <button type="button" class="m3-chip" data-desc="Cat6 Industrial Cabling, Conduit &amp; Termination" data-price="240">
+          <i data-lucide="network"></i>
+          <span>Cabling &amp; Conduit</span>
+        </button>
+        <button type="button" class="m3-chip" data-desc="Contractor Full-Day On-Site Labor (Lead &amp; Assistants)" data-price="480">
+          <i data-lucide="users"></i>
+          <span>Full Day Crew</span>
+        </button>
+        <button type="button" class="m3-chip" data-desc="Mechanical Diagnostics, Calibration &amp; Component Service" data-price="195">
+          <i data-lucide="wrench"></i>
+          <span>Mechanical Service</span>
+        </button>
+        <button type="button" class="m3-chip" data-desc="Structural Materials, Hardware &amp; Site Preparation" data-price="380">
+          <i data-lucide="hammer"></i>
+          <span>Building &amp; Prep</span>
+        </button>
       </div>
 
       <!-- Dynamic Items List -->
-      <div class="items-list" id="itemsList">
-        <!-- Item cards injected here by JavaScript -->
+      <div class="m3-items-container" id="itemsList">
+        <!-- Rendered by app.js -->
       </div>
 
-      <button type="button" class="btn-add-item" id="btnAddItem">
-        <span>➕</span> Add Another Item
+      <button type="button" class="m3-btn-add-item" id="btnAddItem">
+        <i data-lucide="plus"></i>
+        <span>Add Line Item</span>
       </button>
     </section>
 
-    <!-- Totals & Payment Breakdown -->
-    <section class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <span>💵 Pricing & Terms (USD)</span>
-        </h2>
+    <!-- Pricing Summary Card -->
+    <section class="m3-card">
+      <div class="m3-card-header">
+        <div class="m3-card-title">
+          <i data-lucide="calculator"></i>
+          <span>Pricing Summary &amp; Terms</span>
+        </div>
+        <span class="m3-currency-tag">USD ($)</span>
       </div>
 
-      <div class="summary-row">
-        <span>Subtotal</span>
-        <span id="summarySubtotal">$0.00</span>
-      </div>
+      <div class="m3-summary-table">
+        <div class="m3-summary-row">
+          <span class="m3-summary-label">Subtotal</span>
+          <span class="m3-summary-value font-mono" id="summarySubtotal">$0.00</span>
+        </div>
 
-      <div class="form-row" style="margin-top: 8px;">
-        <div class="form-group">
-          <label for="inputDiscount">Discount ($)</label>
-          <div class="input-with-symbol">
-            <span class="input-symbol">$</span>
-            <input type="number" id="inputDiscount" min="0" step="1" placeholder="0">
+        <div class="m3-grid-2" style="margin: 10px 0;">
+          <div class="m3-field">
+            <label for="inputDiscount">Discount ($)</label>
+            <div class="m3-input-affix">
+              <span class="affix-text">$</span>
+              <input type="number" id="inputDiscount" min="0" step="1" placeholder="0" class="font-mono">
+            </div>
+          </div>
+          <div class="m3-field">
+            <label for="inputTax">Sales Tax / VAT (%)</label>
+            <div class="m3-input-affix">
+              <input type="number" id="inputTax" min="0" max="100" step="0.5" placeholder="0" class="font-mono">
+              <span class="affix-text-right">%</span>
+            </div>
           </div>
         </div>
-        <div class="form-group">
-          <label for="inputTax">Tax (%)</label>
-          <input type="number" id="inputTax" min="0" max="100" step="0.5" placeholder="0">
+
+        <div class="m3-field">
+          <label for="inputDeposit">Advance Deposit Required</label>
+          <select id="inputDeposit">
+            <option value="0">No Advance Required (100% on Completion)</option>
+            <option value="30">30% Advance Deposit</option>
+            <option value="50" selected>50% Advance Deposit (Materials Upfront)</option>
+            <option value="70">70% Advance Deposit</option>
+          </select>
+        </div>
+
+        <div class="m3-summary-total">
+          <div class="total-label-group">
+            <span class="total-title">Total Due</span>
+            <span class="total-caption">United States Dollars</span>
+          </div>
+          <span class="total-amount font-mono" id="summaryGrandTotal">$0.00</span>
+        </div>
+
+        <div class="m3-deposit-callout" id="depositRow">
+          <div class="deposit-meta">
+            <i data-lucide="credit-card"></i>
+            <span id="depositLabel">50% Advance Deposit Due:</span>
+          </div>
+          <span class="deposit-val font-mono" id="summaryDeposit">$0.00</span>
         </div>
       </div>
 
-      <div class="form-group" style="margin-top: 4px;">
-        <label for="inputDeposit">Deposit Required (%)</label>
-        <select id="inputDeposit">
-          <option value="0">No Deposit (100% on completion)</option>
-          <option value="30">30% Deposit</option>
-          <option value="50" selected>50% Deposit (Materials Upfront)</option>
-          <option value="70">70% Deposit</option>
-        </select>
-      </div>
-
-      <div class="summary-row bold">
-        <span>Grand Total (USD)</span>
-        <span id="summaryGrandTotal" style="color: var(--primary);">$0.00</span>
-      </div>
-
-      <div class="summary-row deposit" id="depositRow">
-        <span id="depositLabel">50% Deposit Due:</span>
-        <span id="summaryDeposit">$0.00</span>
-      </div>
-
-      <div class="form-group" style="margin-top: 14px;">
-        <label for="quoteNotes">Job Notes & Terms</label>
-        <textarea id="quoteNotes" rows="3" placeholder="Warranties, timeline, or special instructions..."></textarea>
+      <div class="m3-field" style="margin-top: 18px;">
+        <label for="quoteNotes">Contract Terms, Warranty &amp; Instructions</label>
+        <textarea id="quoteNotes" rows="3" placeholder="Specify warranties, completion timeline, or bank/Zelle payment details..."></textarea>
       </div>
     </section>
 
   </main>
 
-  <!-- Sticky Bottom Mobile Action Bar -->
-  <aside class="bottom-bar">
-    <button type="button" class="btn-secondary" id="btnPreview" title="Preview Document">
-      👁️ Preview
-    </button>
-    <button type="button" class="btn-primary" id="btnDownload" title="Download PDF to Phone">
-      ⬇️ PDF
-    </button>
-    <button type="button" class="btn-share" id="btnShare" title="Share directly to WhatsApp or Mail">
-      📲 WhatsApp / Share
-    </button>
+  <!-- Docked M3 Bottom Navigation Bar -->
+  <aside class="m3-docked-bar">
+    <div class="m3-docked-bar-inner">
+      <button type="button" class="m3-bar-btn secondary" id="btnPreview">
+        <i data-lucide="eye"></i>
+        <span>Preview</span>
+      </button>
+      <button type="button" class="m3-bar-btn primary" id="btnDownload">
+        <i data-lucide="download"></i>
+        <span>Download PDF</span>
+      </button>
+      <button type="button" class="m3-bar-btn share" id="btnShare">
+        <i data-lucide="share-2"></i>
+        <span>Share Quote</span>
+      </button>
+    </div>
   </aside>
 
-  <!-- Business Profile Modal -->
-  <div class="modal-backdrop hidden" id="modalProfile">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3 class="modal-title">⚙️ Business Profile</h3>
-        <button type="button" class="modal-close-btn" id="btnCloseProfile">&times;</button>
+  <!-- Business Profile Modal Sheet -->
+  <div class="m3-modal-scrim hidden" id="modalProfile">
+    <div class="m3-sheet" role="dialog" aria-modal="true">
+      <div class="m3-sheet-header">
+        <div class="m3-sheet-title">
+          <i data-lucide="sliders-horizontal"></i>
+          <span>Business Profile</span>
+        </div>
+        <button type="button" class="m3-icon-btn-close" id="btnCloseProfile" aria-label="Close">
+          <i data-lucide="x"></i>
+        </button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="profBusinessName">Business Name</label>
+      <div class="m3-sheet-body">
+        <div class="m3-field">
+          <label for="profBusinessName">Trading Name / Brand</label>
           <input type="text" id="profBusinessName">
         </div>
-        <div class="form-group">
-          <label for="profTagline">Tagline / Trades</label>
+        <div class="m3-field">
+          <label for="profTagline">Service Specializations</label>
           <input type="text" id="profTagline">
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="profPhone">Phone / WhatsApp</label>
+        <div class="m3-grid-2">
+          <div class="m3-field">
+            <label for="profPhone">Primary Phone / WhatsApp</label>
             <input type="tel" id="profPhone">
           </div>
-          <div class="form-group">
-            <label for="profEmail">Email</label>
+          <div class="m3-field">
+            <label for="profEmail">Official Email</label>
             <input type="text" id="profEmail">
           </div>
         </div>
-        <div class="form-group">
-          <label for="profAddress">Service Coverage / Location</label>
+        <div class="m3-field">
+          <label for="profAddress">Operating Area / Base</label>
           <input type="text" id="profAddress">
         </div>
-        <div class="form-group">
-          <label for="profPaymentInfo">Bank / Zelle / Cash Instructions</label>
+        <div class="m3-field">
+          <label for="profPaymentInfo">Direct Payment Instructions (Bank / Zelle / Wire)</label>
           <textarea id="profPaymentInfo" rows="2"></textarea>
         </div>
-        <div class="form-group">
-          <label for="profDefaultTerms">Default Terms & Warranties</label>
+        <div class="m3-field">
+          <label for="profDefaultTerms">Standard Terms, Warranties &amp; Liability Clauses</label>
           <textarea id="profDefaultTerms" rows="3"></textarea>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-primary" id="btnSaveProfile" style="width: 100%;">💾 Save Profile</button>
+      <div class="m3-sheet-footer">
+        <button type="button" class="m3-bar-btn primary" id="btnSaveProfile" style="width: 100%;">
+          <i data-lucide="check"></i>
+          <span>Save Changes</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Past Quotes / History Modal -->
-  <div class="modal-backdrop hidden" id="modalHistory">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3 class="modal-title">📋 Saved Quotes & Invoices</h3>
-        <button type="button" class="modal-close-btn" id="btnCloseHistory">&times;</button>
+  <!-- Document History Modal Sheet -->
+  <div class="m3-modal-scrim hidden" id="modalHistory">
+    <div class="m3-sheet" role="dialog" aria-modal="true">
+      <div class="m3-sheet-header">
+        <div class="m3-sheet-title">
+          <i data-lucide="folder-clock"></i>
+          <span>Saved Documents</span>
+        </div>
+        <button type="button" class="m3-icon-btn-close" id="btnCloseHistory" aria-label="Close">
+          <i data-lucide="x"></i>
+        </button>
       </div>
-      <div class="modal-body" id="historyListContainer">
+      <div class="m3-sheet-body" id="historyListContainer">
         <!-- Rendered dynamically -->
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-secondary" id="btnCloseHistoryFooter" style="width: 100%;">Close</button>
+      <div class="m3-sheet-footer">
+        <button type="button" class="m3-bar-btn secondary" id="btnCloseHistoryFooter" style="width: 100%;">
+          <span>Close Window</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Live PDF Preview Modal -->
-  <div class="modal-backdrop hidden" id="modalPreview">
-    <div class="modal-sheet" style="height: 90vh;">
-      <div class="modal-header">
-        <h3 class="modal-title" id="previewTitle">📄 Document Preview</h3>
-        <button type="button" class="modal-close-btn" id="btnClosePreview">&times;</button>
+  <!-- Live PDF Preview Sheet -->
+  <div class="m3-modal-scrim hidden" id="modalPreview">
+    <div class="m3-sheet preview-sheet" role="dialog" aria-modal="true">
+      <div class="m3-sheet-header">
+        <div class="m3-sheet-title">
+          <i data-lucide="eye"></i>
+          <span id="previewTitle">Document Preview</span>
+        </div>
+        <button type="button" class="m3-icon-btn-close" id="btnClosePreview" aria-label="Close">
+          <i data-lucide="x"></i>
+        </button>
       </div>
-      <div class="modal-body" style="padding: 0; background: #525659;">
-        <iframe id="previewIframe" style="width: 100%; height: 100%; border: none;"></iframe>
+      <div class="m3-sheet-body preview-body">
+        <iframe id="previewIframe" title="PDF Document Preview"></iframe>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-secondary" id="btnDownloadFromPreview">⬇️ Download PDF</button>
-        <button type="button" class="btn-share" id="btnShareFromPreview">📲 Share / WhatsApp</button>
+      <div class="m3-sheet-footer">
+        <button type="button" class="m3-bar-btn secondary" id="btnDownloadFromPreview">
+          <i data-lucide="download"></i>
+          <span>Download</span>
+        </button>
+        <button type="button" class="m3-bar-btn share" id="btnShareFromPreview">
+          <i data-lucide="share-2"></i>
+          <span>Share</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div class="toast" id="toastMessage">Quote saved!</div>
+  <!-- Floating Toast Notification -->
+  <div class="m3-toast" id="toastMessage" role="status" aria-live="polite">
+    <i data-lucide="check" class="toast-icon"></i>
+    <span class="toast-text">Action completed successfully</span>
+  </div>
 
-  <!-- App Entry Point -->
+  <!-- Application Module Script -->
   <script type="module" src="./src/app.js"></script>
 </body>
 </html>
